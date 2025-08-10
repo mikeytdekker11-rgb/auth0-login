@@ -41,23 +41,22 @@
         redirect_uri: window.location.origin
       });
 
+      // Handle redirect callback if coming from Auth0
+      const query = window.location.search;
+      if (query.includes("code=") && query.includes("state=")) {
+        await auth0.handleRedirectCallback();
+        window.history.replaceState({}, document.title, "/");
+        const user = await auth0.getUser();
+        document.body.innerHTML = `<h1>Hello, ${user.name}!</h1><p>You are logged in.</p>`;
+        return;
+      }
+
       const isAuthenticated = await auth0.isAuthenticated();
 
       if (isAuthenticated) {
         const user = await auth0.getUser();
         document.body.innerHTML = `<h1>Hello, ${user.name}!</h1><p>You are logged in.</p>`;
       } else {
-        // Handle redirect callback if coming from Auth0
-        const query = window.location.search;
-        if (query.includes("code=") && query.includes("state=")) {
-          await auth0.handleRedirectCallback();
-          window.history.replaceState({}, document.title, "/");
-          const user = await auth0.getUser();
-          document.body.innerHTML = `<h1>Hello, ${user.name}!</h1><p>You are logged in.</p>`;
-          return;
-        }
-
-        // Attach login event
         document.getElementById("btn-login").addEventListener("click", () => {
           auth0.loginWithRedirect();
         });
