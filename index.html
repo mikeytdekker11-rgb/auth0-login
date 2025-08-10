@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sign In / Sign Up</title>
+  <script src="https://cdn.auth0.com/js/auth0-spa-js/1.28/auth0-spa-js.production.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #001F4D;
+      color: #FFD700;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    button {
+      background-color: #FFD700;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      font-weight: bold;
+      color: #001F4D;
+      cursor: pointer;
+      font-size: 1.2rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>Welcome to GBHS Coding Club</h1>
+  <button id="btn-login">Sign In / Sign Up</button>
+
+  <script>
+    const auth0 = await createAuth0Client({
+      domain: "dev-ngo2vwfdjys6itqp.us.auth0.com",
+      client_id: "Y1WHWVaDdnlGYcIEVQT0DXjeVnz1WYU7",
+      redirect_uri: window.location.origin
+    });
+
+    document.getElementById("btn-login").addEventListener("click", () => {
+      auth0.loginWithRedirect();
+    });
+
+    window.onload = async () => {
+      const isAuthenticated = await auth0.isAuthenticated();
+      if (isAuthenticated) {
+        const user = await auth0.getUser();
+        document.body.innerHTML = `<h1>Hello, ${user.name}!</h1><p>You are logged in.</p>`;
+      } else {
+        // Handle redirect callback
+        const query = window.location.search;
+        if (query.includes("code=") && query.includes("state=")) {
+          await auth0.handleRedirectCallback();
+          window.history.replaceState({}, document.title, "/");
+          const user = await auth0.getUser();
+          document.body.innerHTML = `<h1>Hello, ${user.name}!</h1><p>You are logged in.</p>`;
+        }
+      }
+    };
+  </script>
+</body>
+</html>
